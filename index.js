@@ -23,20 +23,33 @@ const secretHtml = __dirname + "/public/secret.html";
 //setup the middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 
-//render the index.html
-app.get("/", (req, res) => {
-  res.sendFile(indexHtml);
-});
+//create a middleware to check the request if authroized or not
+var authenticate = false;
+//This will get through first before passing in
+const checkPassword = (req, res, next) => {
+  if (req.body.password === "ILoveProgramming") {
+    authenticate = true;
+    
+  }
+  next();
+};
+//use the middleware 
+app.use(checkPassword);
 
+app.get("/",(req, res) => {
+    res.sendFile(indexHtml);
+})
 //get the data from index.html
 app.post("/check", (req, res) => {
-  const passwordInput = req.body.password;
-  if (passwordInput === "ILoveProgramming") {
-    res.sendFile(secretHtml);
-  }
+if(authenticate){
+    res.sendFile(secretHtml)
+}
+else{
+    res.sendFile(indexHtml);
+}
 });
-//when data is true render secret.html
-//if false then render index.html
+
+
 
 //start server
 app.listen(port, () => {
